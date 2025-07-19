@@ -1,13 +1,12 @@
 import Button from "@mui/material/Button";
-import InputLabel from "@mui/material/InputLabel";
 import TextField from "@mui/material/TextField";
 import { useRef, useState } from "react";
 
-const redColors = ["bg-violet-100", "bg-violet-20", "bg-violet-200", "bg-violet-400", "bg-violet-500", "bg-violet-600", "bg-violet-700", 'bg-violet-800', 'bg-violet-900', 'bg-violet-950']
-const greenColors = ["bg-green-100", "bg-green-20", "bg-green-200", "bg-green-400", "bg-green-500", "bg-green-600", "bg-green-700", 'bg-green-800', 'bg-green-900', 'bg-green-950'].reverse()
+const redColors = ["bg-red-100", "bg-red-200", "bg-red-300", "bg-red-400", "bg-red-500", "bg-red-600", "bg-red-700", 'bg-red-800', 'bg-red-900', 'bg-red-950']
+const greenColors = ["bg-green-100", "bg-green-200", "bg-green-300", "bg-green-400", "bg-green-500", "bg-green-600", "bg-green-700", 'bg-green-800', 'bg-green-900', 'bg-green-950'].reverse()
 
-const GOOD_COLOR = 'bg-green-950';
-const BAD_COLOR = 'bg-red-950';
+const GOOD_COLOR = 'bg-green-400';
+const BAD_COLOR = 'bg-red-400';
 
 const allColors = [...redColors, 'bg-black', ...greenColors];
 
@@ -137,22 +136,65 @@ function App() {
   }
 
   return (
-    <div style={{ margin: '20px' }}>
-      <TextField id="outlined-basic" label="WorldSize" variant="outlined" defaultValue={worldSize} onChange={(ev) => setWorldSize(Number.parseInt(ev.target.value ?? '0'))} />
-      <TextField id="outlined-basic" label="Replication Threashold %" variant="outlined" defaultValue={replicationThreashold} onChange={(ev) => setReplicationThreashold(Number.parseInt(ev.target.value ?? '0'))} />
-      <InputLabel>People Count:{peopleRef.current.length}</InputLabel>
-      <Button onClick={onCerateWorldClick}>Create The Universe</Button>
-      <Button onClick={() => addPersonClick()}>Add Person</Button>
-      <Button onClick={addRewardClick}>Add Reward</Button>
-      <Button onClick={startSimulationClicked}>Start Simulation</Button>
-      <div>
-        {world.map((arr, index) => {
-          return <div className="flex flex-row" key={index}>{
-            arr.map((v, i) => {
-              return <div key={i} className={`border border-black w-10 h-10 ${v}`}></div>
-            })
-          }</div>
-        })}
+    <div className="min-h-screen bg-gray-100 p-5">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">Square World Simulation</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <TextField 
+              id="world-size" 
+              label="World Size" 
+              variant="outlined" 
+              defaultValue={worldSize} 
+              onChange={(ev) => setWorldSize(Number.parseInt(ev.target.value ?? '0'))}
+              fullWidth
+              size="small"
+            />
+          </div>
+          <div>
+            <TextField 
+              id="replication-threshold" 
+              label="Replication Threshold %" 
+              variant="outlined" 
+              defaultValue={replicationThreashold} 
+              onChange={(ev) => setReplicationThreashold(Number.parseInt(ev.target.value ?? '0'))}
+              fullWidth
+              size="small"
+            />
+          </div>
+        </div>
+        
+        <div className="mb-4 p-3 bg-blue-50 rounded border">
+          <span className="text-lg font-semibold text-blue-800">People Count: {peopleRef.current.length}</span>
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button variant="contained" color="primary" onClick={onCerateWorldClick}>
+            Create The Universe
+          </Button>
+          <Button variant="contained" color="secondary" onClick={() => addPersonClick()}>
+            Add Person
+          </Button>
+          <Button variant="contained" color="success" onClick={addRewardClick}>
+            Add Reward
+          </Button>
+          <Button variant="contained" color="warning" onClick={startSimulationClicked}>
+            Start Simulation
+          </Button>
+        </div>
+        
+        <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50 overflow-auto">
+          <div className="inline-block">
+            {world.map((arr, index) => {
+              return <div className="flex flex-row" key={index}>{
+                arr.map((v, i) => {
+                  return <div key={i} className={`border border-gray-400 w-8 h-8 ${v}`}></div>
+                })
+              }</div>
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );
