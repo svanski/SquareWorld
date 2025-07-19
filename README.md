@@ -5,10 +5,14 @@ A simulation application with a React frontend using Vite and a NestJS backend.
 ## Project Structure
 
 ```
-├── src/                    # React frontend source
-├── server/                 # NestJS backend
-├── public/                 # Static assets
-└── package.json           # Frontend dependencies
+├── ui/                     # React frontend application
+│   ├── src/               # React source code
+│   ├── public/            # Static assets
+│   └── package.json       # Frontend dependencies
+├── server/                # NestJS backend application
+│   ├── src/               # NestJS source code
+│   └── package.json       # Backend dependencies
+└── package.json           # Root package.json with scripts
 ```
 
 ## Getting Started
@@ -19,16 +23,21 @@ A simulation application with a React frontend using Vite and a NestJS backend.
 
 ### Installation
 
-1. Install frontend dependencies:
+Install all dependencies (root, frontend, and backend):
 ```bash
-npm install
+npm run install:all
 ```
 
-2. Install server dependencies:
+Or install them separately:
 ```bash
-cd server
+# Install root dependencies
 npm install
-cd ..
+
+# Install frontend dependencies
+cd ui && npm install && cd ..
+
+# Install server dependencies
+cd server && npm install && cd ..
 ```
 
 ### Development
@@ -40,16 +49,16 @@ npm run dev
 ```
 
 This will start:
-- React frontend on http://localhost:3000 (with Vite)
+- React frontend on http://localhost:5173 (with Vite)
 - NestJS backend on http://localhost:3001
 
-**Note**: If port 3000 is already in use, Vite will automatically use the next available port (like 3001, 3002, etc.). The backend will always run on port 3001.
+**Note**: If port 5173 is already in use, Vite will automatically use the next available port. The backend will always run on port 3001.
 
 You can also run them separately:
 
 ```bash
 # Frontend only
-npm run dev:client
+npm run dev:ui
 
 # Backend only
 npm run dev:server
@@ -57,13 +66,17 @@ npm run dev:server
 
 ### Building for Production
 
-Build the frontend:
+Build both frontend and backend:
 ```bash
 npm run build
 ```
 
-Build the backend:
+Or build them separately:
 ```bash
+# Frontend only
+npm run build:ui
+
+# Backend only
 npm run build:server
 ```
 
@@ -77,7 +90,7 @@ npm start
 Or run them separately:
 ```bash
 # Frontend (preview mode)
-npm run preview
+npm run start:ui
 
 # Backend
 npm run start:server

@@ -1,40 +1,24 @@
 {
-  "name": "square-world",
-  "version": "0.1.0",
-  "private": true,
+  "name": "squareworld",
+  "version": "1.0.0",
+  "description": "SquareWorld - A React frontend with NestJS backend",
   "scripts": {
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
-    "dev:client": "vite",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:ui\"",
     "dev:server": "cd server && npm run start:dev",
-    "build": "tsc && vite build",
+    "dev:ui": "cd ui && npm run dev",
+    "build": "npm run build:server && npm run build:ui",
     "build:server": "cd server && npm run build",
-    "start": "concurrently \"npm run preview\" \"npm run start:server\"",
+    "build:ui": "cd ui && npm run build",
+    "install:all": "npm install && cd server && npm install && cd ../ui && npm install",
+    "start": "concurrently \"npm run start:server\" \"npm run start:ui\"",
     "start:server": "cd server && npm run start:prod",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.13.5",
-    "@emotion/styled": "^11.13.5",
-    "@mui/material": "^6.1.9",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "start:ui": "cd ui && npm run preview"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
-    "@typescript-eslint/eslint-plugin": "^7.2.0",
-    "@typescript-eslint/parser": "^7.2.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.19",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.57.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.6",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.0"
-  }
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "ui",
+    "server"
+  ]
 }
