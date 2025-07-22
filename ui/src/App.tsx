@@ -1,6 +1,7 @@
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { logAnalyticsEvent } from "./firebase";
 
 const redColors = ["bg-red-100", "bg-red-200", "bg-red-300", "bg-red-400", "bg-red-500", "bg-red-600", "bg-red-700", 'bg-red-800', 'bg-red-900', 'bg-red-950']
 const greenColors = ["bg-green-100", "bg-green-200", "bg-green-300", "bg-green-400", "bg-green-500", "bg-green-600", "bg-green-700", 'bg-green-800', 'bg-green-900', 'bg-green-950'].reverse()
@@ -25,7 +26,16 @@ function App() {
   const [worldSize, setWorldSize] = useState(20);
   const [replicationThreashold, setReplicationThreashold] = useState(99);
   const [world, setWorld] = useState<string[][]>([]);
+  const [simulationRunning, setSimulationRunning] = useState(false);
+  const simulationRef = useRef<boolean>(false);
   const peopleRef = useRef<Person[]>([]);
+
+  // Track app initialization
+  useEffect(() => {
+    logAnalyticsEvent('app_initialized', {
+      timestamp: new Date().toISOString()
+    });
+  }, []);
 
   function onCerateWorldClick() {
     const w: Array<string[]> = [];
@@ -39,6 +49,12 @@ function App() {
 
     setWorld(w);
     peopleRef.current = [];
+    
+    // Track world creation
+    logAnalyticsEvent('world_created', {
+      world_size: worldSize,
+      replication_threshold: replicationThreashold
+    });
   }
 
   function addPersonClick(parentOneId?: string, parentTwoId?: string) {
@@ -46,7 +62,7 @@ function App() {
     const x = getRandomNumberBetween(0, worldSize - 1);
     const y = getRandomNumberBetween(0, worldSize - 1);
 
-    peopleRef.current.push({
+    const newPerson = {
       id: `${Date.now()}-${Math.random().toString().substring(2)}`,
       desireToReplicate: getRandomNumberBetween(0, 100),
       parents: [parentOneId, parentTwoId].filter(p => p !== undefined) as string[],
@@ -55,8 +71,19 @@ function App() {
       currentX: x,
       currentY: y,
       color: 'bg-black'
-    });
+    };
+
+    peopleRef.current.push(newPerson);
     renderWorld();
+
+    // Track person addition
+    logAnalyticsEvent('person_added', {
+      person_id: newPerson.id,
+      has_parents: newPerson.parents.length > 0,
+      parent_count: newPerson.parents.length,
+      total_population: peopleRef.current.length,
+      desire_to_replicate: newPerson.desireToReplicate
+    });
   }
 
   function getRandomNumberBetween(min: number, max: number) {
@@ -64,10 +91,36 @@ function App() {
   }
 
   async function startSimulationClicked() {
-    while (true) {
+    if (simulationRunning) {
+      // Stop simulation
+      simulationRef.current = false;
+      setSimulationRunning(false);
+      
+      logAnalyticsEvent('simulation_stopped', {
+        population: peopleRef.current.length,
+        world_size: worldSize
+      });
+      return;
+    }
+
+    // Start simulation
+    simulationRef.current = true;
+    setSimulationRunning(true);
+    
+    logAnalyticsEvent('simulation_started', {
+      population: peopleRef.current.length,
+      world_size: worldSize,
+      replication_threshold: replicationThreashold
+    });
+
+    let generations = 0;
+    const startTime = Date.now();
+
+    while (simulationRef.current) {
       await sleep(10);
       movePeople();
 
+      let replicationsThisRound = 0;
       for (let i = 0; i < peopleRef.current.length - 1; i++) {
         for (let j = i + 1; j < peopleRef.current.length; j++) {
           const p1 = peopleRef.current[i];
@@ -76,9 +129,22 @@ function App() {
             const shouldReplicate = p1.desireToReplicate > replicationThreashold && p2.desireToReplicate > replicationThreashold;
             if (shouldReplicate) {
               addPersonClick(p1.id, p2.id);
+              replicationsThisRound++;
             }
           }
         }
+      }
+
+      generations++;
+      
+      // Log periodic simulation stats
+      if (generations % 100 === 0) {
+        logAnalyticsEvent('simulation_milestone', {
+          generations: generations,
+          population: peopleRef.current.length,
+          replications_this_round: replicationsThisRound,
+          simulation_duration_ms: Date.now() - startTime
+        });
       }
     }
   }
@@ -123,10 +189,29 @@ function App() {
   }
 
   function addRewardClick() {
+    let goodRewards = 0;
+    let badRewards = 0;
+    
     for (let i = 0; i < 10; i++) {
-      world[getRandomNumberBetween(0, worldSize - 1)][getRandomNumberBetween(0, worldSize - 1)] = getRandomNumberBetween(0, 1) === 0 ? GOOD_COLOR : BAD_COLOR;
+      const isGoodReward = getRandomNumberBetween(0, 1) === 0;
+      world[getRandomNumberBetween(0, worldSize - 1)][getRandomNumberBetween(0, worldSize - 1)] = isGoodReward ? GOOD_COLOR : BAD_COLOR;
+      
+      if (isGoodReward) {
+        goodRewards++;
+      } else {
+        badRewards++;
+      }
     }
+    
     setWorld([...world]);
+    
+    // Track reward addition
+    logAnalyticsEvent('rewards_added', {
+      good_rewards: goodRewards,
+      bad_rewards: badRewards,
+      total_rewards: 10,
+      world_size: worldSize
+    });
   }
 
   function sleep(ms: number): Promise<void> {
@@ -180,7 +265,7 @@ function App() {
             Add Reward
           </Button>
           <Button variant="contained" color="warning" onClick={startSimulationClicked}>
-            Start Simulation
+            {simulationRunning ? 'Stop Simulation' : 'Start Simulation'}
           </Button>
         </div>
         
