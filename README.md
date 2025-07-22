@@ -1,6 +1,6 @@
 # Square World
 
-A simulation application with a React frontend using Vite and a NestJS backend.
+This project is an attampt tp buold a simplied universe where in place of ppl squares live in 2D square universe. Along the 
 
 ## Project Structure
 
